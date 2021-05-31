@@ -1,0 +1,170 @@
+@import '~antd/es/style/themes/default.less';
+@import './styles/atomic.less';
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.ant-layout {
+  min-height: 100vh;
+
+  .ant-pro-sider-logo img {
+    border-radius: 50%;
+  }
+}
+
+canvas {
+  display: block;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+}
+
+.ant-menu-dark.ant-menu-inline .ant-menu-item,
+.ant-menu-dark.ant-menu-inline .ant-menu-submenu-title {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.ant-pro-sider-links {
+  display: none;
+}
+
+.ant-table-thead > tr > th,
+.ant-badge-status {
+  white-space: nowrap;
+}
+
+.ant-image-img {
+  width: 100%;
+}
+
+.layout--main {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  background-color: @menu-bg;
+
+  .layout--main__title {
+    margin-bottom: 12px;
+    color: @heading-color;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .layout--main__content {
+    -ms-flex: 1;
+    flex: 1;
+    padding: 8px 40px;
+    -webkit-box-flex: 1;
+
+    .layout--table {
+      overflow-x: auto;
+    }
+  }
+
+  .layout--main__left {
+    width: 224px;
+    border-right: @border-width-base @border-style-base @border-color-split;
+
+    .ant-menu {
+      border-right: none;
+    }
+
+    .ant-menu-item {
+      border: none;
+    }
+
+    .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
+      font-weight: bold;
+
+      &::after {
+        -webkit-transform: scaleY(1);
+        transform: scaleY(1);
+        opacity: 1;
+      }
+    }
+  }
+}
+
+@media (min-width: @screen-xs) {
+  .layout--main {
+    .layout--main__left {
+      & ~ .layout--main__content {
+        .layout--table {
+          width: calc(100vw - 352px);
+        }
+      }
+    }
+
+    .layout--main__content {
+      .layout--table {
+        width: calc(100vw - 128px);
+      }
+    }
+  }
+}
+
+@media (min-width: @screen-md) {
+  .layout--main {
+    .layout--main__left {
+      & ~ .layout--main__content {
+        .layout--table {
+          width: calc(100vw - 400px);
+        }
+      }
+    }
+
+    .layout--main__content {
+      .layout--table {
+        width: calc(100vw - 176px);
+      }
+    }
+  }
+}
+
+@media (min-width: @screen-lg) {
+  .layout--main {
+    .layout--main__left {
+      & ~ .layout--main__content {
+        .layout--table {
+          width: calc(100vw - 560px);
+        }
+      }
+    }
+
+    .layout--main__content {
+      .layout--table {
+        width: calc(100vw - 336px);
+      }
+    }
+  }
+}
+
+// 兼容IE11
+@media screen and(-ms-high-contrast: active), (-ms-high-contrast: none) {
+  body .ant-design-pro > .ant-layout {
+    min-height: 100vh;
+  }
+}

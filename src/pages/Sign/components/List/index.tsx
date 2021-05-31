@@ -1,0 +1,276 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-underscore-dangle */
+import { useEffect, useState } from "react";
+import type { FC } from "react";
+import { Row, Col, Divider, Table, Menu, Button, Dropdown, Space,Form, Input } from "antd";
+import type { Dispatch } from "umi";
+import { connect } from "umi";
+import ModalCreate from "./ModalCreate";
+import type { SignT } from "../../data";
+import { modalConfirmDelete } from "@/utils/utils";
+import { RequestQueryBuilder, CondOperator } from "@nestjsx/crud-request";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  MoreOutlined,
+  PlusOutlined,
+  SearchOutlined
+} from "@ant-design/icons";
+
+type Props = {
+  dispatch: Dispatch;
+  dataTable: any;
+  loadingGet: boolean;
+  loadingCreate: boolean;
+  loadingUpdate: boolean;
+  loadingDelete: boolean;
+};
+
+const ListNew: FC<Props> = ({
+  dispatch,
+  dataTable,
+  loadingCreate,
+  loadingDelete,
+  loadingGet,
+  loadingUpdate,
+}) => {
+  const [isVisibleModal, setIsVisibleModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<any>(null);
+  const [search, setSearch] = useState<any>('');
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10
+  });
+
+  useEffect(() => {
+    const qb = RequestQueryBuilder.create();
+    qb.sortBy({ field: "createdAt", order: "DESC" })
+    .setLimit(pagination?.limit || 10)
+    .setPage(pagination?.page || 1)
+    if(search && search !== ''){
+      qb.setOr({
+        field: "name",
+        operator: CondOperator.CONTAINS_LOW,
+        value: search
+      })
+    }
+    dispatch({
+      type: "sign/getList",
+      payload: {
+        query: qb.query()
+      }
+    });
+  }, [dispatch, pagination]);
+
+  useEffect(() => {
+    if (loadingGet === true) {
+      setLoading(true);
+    }
+    if (loadingGet === false) {
+      setLoading(false);
+    }
+  }, [loadingGet, dispatch]);
+
+  useEffect(() => {
+    if (
+      loadingCreate === true ||
+      loadingDelete === true ||
+      loadingUpdate === true
+    ) {
+      setLoading(true);
+    }
+    if (
+      loadingCreate === false ||
+      loadingDelete === false ||
+      loadingUpdate === false
+    ) {
+      const qb = RequestQueryBuilder.create();
+      qb.sortBy({ field: "createdAt", order: "DESC" })
+      .setLimit(pagination?.limit || 10)
+    .setPage(pagination?.page || 1)
+
+      dispatch({
+        type: "sign/getList",
+        payload: {
+          query: qb.query()
+        }
+      });
+      setLoading(false);
+    }
+  }, [loadingCreate, dispatch, loadingDelete, loadingUpdate]);
+
+
+  const onDeleteOne = (id: any) => {
+    const onOk = () =>
+      dispatch({
+        type: "sign/deleteOne",
+        payload: {
+            id
+        },
+      });
+    modalConfirmDelete(onOk);
+  };
+
+  const columns: any = [
+    {
+      title: "STT",
+      dataIndex: "STT",
+      fixed: "left",
+      render: (value: any, item: any, index: number) => index + 1,
+    },
+    {
+      title: "Câu hỏi",
+      dataIndex: "name",
+      render: (value: any) => value?.length > 120 ? `${value.slice(0,120)}...` : value,
+    },
+    {
+      title: "Loại",
+      dataIndex: "type",
+      render: (value: any) => value === 'dau_hieu' ? "Dấu hiệu" : "Yếu tố dịch tễ",
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      render: (value: any) => value?.length > 120 ? `${value.slice(0,120)}...` : value,
+    },
+    {
+      title: "Hành động",
+      dataIndex: "",
+      fixed: "right",
+      width: 150,
+      render: (value: any, record: any) => {
+        const menu = (
+          <Menu>
+            <Menu.Item
+              key='edit'
+              icon={<EditOutlined />}
+              onClick={() => { setIsVisibleModal(true); setData(record)}}
+            >
+              Sửa
+            </Menu.Item>
+            <Menu.Item
+             key='delete'
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => onDeleteOne(record?.id)}
+            >
+              Xóa
+            </Menu.Item>
+          </Menu>
+        );
+        return (
+          <Row>
+            <Col span={24}>
+              <Dropdown overlay={menu}>
+                <Button type="text">
+                  <MoreOutlined />
+                </Button>
+              </Dropdown>
+            </Col>
+          </Row>
+        );
+      },
+    },
+  ];
+
+  const onSearch = (values: any) => {
+    setSearch(values.search)
+    const qb = RequestQueryBuilder.create();
+    qb.sortBy({ field: "createdAt", order: "DESC" })
+    .setLimit(pagination?.limit || 10)
+    .setPage(pagination?.page || 1)
+    if(values?.search && values?.search !== ''){
+      qb.setOr({
+        field: "name",
+        operator: CondOperator.CONTAINS_LOW,
+        value: values.search
+      })
+    }
+    dispatch({
+      type: "sign/getList",
+      payload: {
+        query: qb.query()
+      }
+    });
+  }
+
+  return (
+    <>
+      <div className="layout--main__title">
+        Danh sách câu hỏi
+      </div>
+      <Divider />
+      <Row gutter={24} className="mb--24">
+        <Col md={12}></Col>
+        <Col md={12}>
+          <Space className="w--full justify-content--flexEnd">
+
+            <Form initialValues={{ search: '' }} onFinish={onSearch}>
+              <Form.Item name="search" className="mb--0">
+                <Space size={2}>
+                  <Input className="w--200" placeholder="Tìm kiếm" />
+                  <Button htmlType="submit">
+                    <SearchOutlined />
+                  </Button>
+                </Space>
+              </Form.Item>
+            </Form>
+
+            <Button
+              type="primary"
+              onClick={() => {
+                setIsVisibleModal(true)
+              }}
+            >
+              <PlusOutlined className="mr--5" />
+              Thêm mới
+            </Button>
+          </Space>
+        </Col>
+      </Row>
+
+      <Table
+        rowKey={(item: any) => item.id}
+        loading={loading}
+        columns={columns}
+        dataSource={dataTable?.data?.data || []}
+        pagination={{
+          position: ['bottomRight'],
+          showSizeChanger: true,
+          total: dataTable?.data?.total,
+          showTotal: (value: any) => <b>Số lượng: {value}</b> ,
+          onChange: (value: number, pageSize: any) => setPagination({ page: value, limit: pageSize}),
+          current: pagination?.page || 1,
+          pageSize: pagination?.limit || 10,
+          pageSizeOptions: ["10", "20", "50", "100"],
+
+        }}
+      ></Table>
+
+      <ModalCreate
+        isVisibleModal={isVisibleModal}
+        setIsVisibleModal={() => {setIsVisibleModal(false); setData(null)} }
+        data={data}
+      />
+    </>
+  );
+};
+
+export default connect(
+  ({
+    sign,
+    loading,
+  }: {
+    sign: SignT;
+    loading: {
+      effects: Record<string, boolean>;
+    };
+  }) => ({
+    dataTable: sign.listSign,
+    loadingGet: loading.effects["sign/getList"],
+    loadingCreate: loading.effects["sign/create"],
+    loadingUpdate: loading.effects["sign/update"],
+    loadingDelete: loading.effects["sign/deleteOne"],
+  })
+)(ListNew);
